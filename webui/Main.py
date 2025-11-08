@@ -217,7 +217,7 @@ if auth_required and not st.session_state.get("is_authenticated", False):
             if pwd == _env_password:
                 st.session_state["is_authenticated"] = True
                 # 重新运行以显示主界面
-                st.experimental_rerun()
+                st.rerun()
             else:
                 st.error(tr("Incorrect password"))
     with col2:
