@@ -199,6 +199,33 @@ def tr(key):
     return loc.get("Translation", {}).get(key, key)
 
 
+# 简单密码认证（通过环境变量传入密码，不把密码写入代码或配置）
+# 如果设置了环境变量 MONEYPRINTER_PASSWORD 或 MPT_PASSWORD，则启用认证
+if "is_authenticated" not in st.session_state:
+    st.session_state["is_authenticated"] = False
+
+_env_password = os.environ.get("MONEYPRINTER_PASSWORD") or os.environ.get("MPT_PASSWORD") or ""
+auth_required = bool(_env_password)
+
+if auth_required and not st.session_state.get("is_authenticated", False):
+    st.title(f"MoneyPrinterTurbo v{config.project_version}")
+    st.write(tr("Password Protected"))
+    pwd = st.text_input(tr("Password"), type="password", key="env_login_password")
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button(tr("Login")):
+            if pwd == _env_password:
+                st.session_state["is_authenticated"] = True
+                # 重新运行以显示主界面
+                st.experimental_rerun()
+            else:
+                st.error(tr("Incorrect password"))
+    with col2:
+        if st.button(tr("Quit")):
+            st.stop()
+    # 在未通过认证前，阻止后续代码执行
+    st.stop()
+
 # 创建基础设置折叠框
 if not config.app.get("hide_config", False):
     with st.expander(tr("Basic Settings"), expanded=False):
